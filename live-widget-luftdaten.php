@@ -35,6 +35,16 @@ class LuftdatenAmpel extends WP_Widget {
 				<label for="<?php echo $this->get_field_id('unit'); ?>"><?php _e('Show Unit?', 'LuftdatenAmpel'); ?></label>
 				<input class="checkbox" type="checkbox" <?php checked( $instance[ 'unit' ], 'on' ); ?> id="<?php echo $this->get_field_id( 'unit' ); ?>" name="<?php echo $this->get_field_name( 'unit' ); ?>" />
 			</p>
+
+			<p>
+				<label for="<?php echo $this->get_field_id('addtextcheck'); ?>"><?php _e('Show additional Text?', 'LuftdatenAmpel'); ?></label>
+				<input class="checkbox" type="checkbox" <?php checked( $instance[ 'addtextcheck' ], 'on' ); ?> id="<?php echo $this->get_field_id( 'addtextcheck' ); ?>" name="<?php echo $this->get_field_name( 'addtextcheck' ); ?>" />
+			</p>
+
+			<p>
+				<label for="<?php echo $this->get_field_id('addtext'); ?>"><?php _e('additional Text', 'LuftdatenAmpel'); ?></label>
+				<input class="widefat" id="<?php echo $this->get_field_id('addtext'); ?>" name="<?php echo $this->get_field_name('addtext'); ?>" type="text" value="<?php echo $instance['addtext']; ?>" />
+			</p>
 		
 	<?php	
 	}
@@ -68,6 +78,7 @@ class LuftdatenAmpel extends WP_Widget {
       	}
 
       	$instance[ 'unit' ] = $new_instance[ 'unit' ];
+      	$instance[ 'addtextcheck' ] = $new_instance[ 'addtextcheck' ];
 
      	return $instance;
 	}
@@ -76,6 +87,7 @@ class LuftdatenAmpel extends WP_Widget {
 	function widget($args, $instance) {
 
 		$unit = $instance[ 'unit' ] ? 'µg/m³' : '';
+		$addtextcheck = $instance[ 'addtextcheck' ] ? true : false;
 
 		$p1g=50;
 		$p2g=20;
@@ -100,7 +112,7 @@ class LuftdatenAmpel extends WP_Widget {
    		$count = 0;
 
    		foreach ($instance as $key => $value) {
-			if(strcmp($key,'title')&&strcmp($key,'neuersensor')&&strcmp($key,'unit')){
+			if(strcmp($key,'title')&&strcmp($key,'neuersensor')&&strcmp($key,'unit')&&strcmp($key,'addtext')&&strcmp($key,'addtextcheck')){
 			//var_dump($value);	
 				$sensordata = $this->getData($value);
 				$v1 = $v1 + $sensordata['P1'];
@@ -146,6 +158,11 @@ class LuftdatenAmpel extends WP_Widget {
               <?= round($ampelvalue2,1) ?>
               </text>
    		</svg>
+   		<?php
+   			if($addtextcheck){
+   				echo '<p>'.$instance['addtext'].'</p>';
+   			}
+   		?>
    		</div>
 
    		<?php
