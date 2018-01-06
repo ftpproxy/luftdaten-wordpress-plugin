@@ -3,7 +3,7 @@
 Plugin Name: Live Widget Luftdaten.info
 Plugin URI: http://www.bleeptrack.de/feinstaub-widget/
 Description: Plugin with widget to show live data from a luftdaten.info sensor
-Version: 1.2.1
+Version: 1.3.0
 Author: Bleeptrack
 Author URI: http://www.bleeptrack.de/
 License: GPL2
@@ -45,6 +45,11 @@ class LuftdatenAmpel extends WP_Widget {
 				<label for="<?php echo $this->get_field_id('addtext'); ?>"><?php _e('additional Text', 'LuftdatenAmpel'); ?></label>
 				<input class="widefat" id="<?php echo $this->get_field_id('addtext'); ?>" name="<?php echo $this->get_field_name('addtext'); ?>" type="text" value="<?php echo $instance['addtext']; ?>" />
 			</p>
+
+			<p>
+				<label for="<?php echo $this->get_field_id('timestamp'); ?>"><?php _e('Show Timestamp?', 'LuftdatenAmpel'); ?></label>
+				<input class="checkbox" type="checkbox" <?php checked( $instance[ 'timestamp' ], 'on' ); ?> id="<?php echo $this->get_field_id( 'timestamp' ); ?>" name="<?php echo $this->get_field_name( 'timestamp' ); ?>" />
+			</p>
 		
 	<?php	
 	}
@@ -79,6 +84,7 @@ class LuftdatenAmpel extends WP_Widget {
 
       	$instance[ 'unit' ] = $new_instance[ 'unit' ];
       	$instance[ 'addtextcheck' ] = $new_instance[ 'addtextcheck' ];
+      	$instance[ 'timestamp' ] = $new_instance[ 'timestamp' ];
 
      	return $instance;
 	}
@@ -86,8 +92,24 @@ class LuftdatenAmpel extends WP_Widget {
 
 	function widget($args, $instance) {
 
-		$unit = $instance[ 'unit' ] ? 'µg/m³' : '';
-		$addtextcheck = $instance[ 'addtextcheck' ] ? true : false;
+		if(!isset($instance['unit'])){
+			$unit = '';
+		}else{
+			$unit = $instance[ 'unit' ] ? 'µg/m³' : '';	
+		}
+
+		if(!isset($instance['addtextcheck'])){
+			$addtextcheck = false;
+		}else{
+			$addtextcheck = $instance[ 'addtextcheck' ] ? true : false;	
+		}
+
+		if(!isset($instance['timestamp'])){
+			$timestamp = false;
+		}else{
+			$timestamp = $instance[ 'timestamp' ] ? true : false;
+		}
+		
 
 		$p1g=50;
 		$p2g=20;
@@ -110,17 +132,25 @@ class LuftdatenAmpel extends WP_Widget {
    		$v1 = 0;
    		$v2 = 0;
    		$count = 0;
+   		$tstmp = 0;
 
    		foreach ($instance as $key => $value) {
-			if(strcmp($key,'title')&&strcmp($key,'neuersensor')&&strcmp($key,'unit')&&strcmp($key,'addtext')&&strcmp($key,'addtextcheck')){
+			if(strcmp($key,'title')&&strcmp($key,'neuersensor')&&strcmp($key,'unit')&&strcmp($key,'addtext')&&strcmp($key,'addtextcheck')&&strcmp($key,'timestamp')){
 			//var_dump($value);	
 				$sensordata = $this->getData($value);
-				$v1 = $v1 + $sensordata['P1'];
-				$v2 = $v2 + $sensordata['P2'];
-				$count = $count+1;	
+				var_dump($sensordata);
+				if(isset($sensordata['P1']) && isset($sensordata['P2'])){
+
+					//$tstmp = strtotime($sensordata['timestamp']." +2 hours");
+					$tstmp = strtotime(get_date_from_gmt($sensordata['timestamp']));
+					$v1 = $v1 + $sensordata['P1'];
+					$v2 = $v2 + $sensordata['P2'];
+					$count = $count+1;	
+				}
 			}
 		}
 
+		if($count>0){
 		$ampelvalue1 = $v1/$count;
 		$ampelvalue2 = $v2/$count;
 
@@ -162,11 +192,16 @@ class LuftdatenAmpel extends WP_Widget {
    			if($addtextcheck){
    				echo '<p>'.$instance['addtext'].'</p>';
    			}
+   			if($timestamp){
+   				echo '<p class="la-timestamp">'.date("d.m. H:i",$tstmp).'</p>';
+   			}
    		?>
    		</div>
 
    		<?php
-
+   		}else{
+   			echo '<h2>No PM Data</h2>';
+   		}
 		echo $after_widget;
 		
 	}
@@ -188,12 +223,14 @@ class LuftdatenAmpel extends WP_Widget {
 		$v = array(); 
 		
 		$results = $sensor->fetchJson();
+
 			
 		$count = 0;
 
 		if($results!=null){
 		    
 			foreach ($results as $item) {
+				
 			    	
 			    foreach($item->sensordatavalues as $values){
 			    	$count++;
@@ -203,6 +240,8 @@ class LuftdatenAmpel extends WP_Widget {
 			    		$v[$values->value_type]=$v[$values->value_type]+($values->value-$v[$values->value_type])/$count;
 			    	}
 			    }
+
+			    $v['timestamp'] = $item->timestamp;
 			    	
 			}
 		}
@@ -384,10 +423,11 @@ class LuftdatenWidget extends WP_Widget {
 		echo '<div id="'.$sensor->id.'-name">'.$sensor->items['name'].'</div><ul>';
 		
    		foreach ($v as $key => $value) {
+   			//var_dump($sensor->items["P2"]);
    			if(strcmp($key,'pressure')==0){
    				$value=$value/100;
    			}
-   			echo '<li id="'.$sensor->id.'-'.$key.'">'.$sensor->items[$key].': '.round($value,1).$this->getUnit($key).'</li>';
+   			echo '<li id="'.$sensor->id.'-'.$key.'">'.$sensor->items[trim($key)].': '.round($value,1).$this->getUnit($key).'</li>';
    			
    		}
 		
@@ -415,19 +455,41 @@ class LuftdatenWidget extends WP_Widget {
 
 class Sensor{
 	public $id = 260;
-	public $items = array( );
+	public $items = array();
+	public $pos = array();
+	public $valid = 0;
 
 	function Sensor($sensorid){
 		$this->id = $sensorid;
 		$this->items['name']="Sensor ".$this->id;
 		$results = $this->fetchJson();
-		foreach($results[0]->sensordatavalues as $values){
-		    		
-		    $name=$values->value_type;
-		    //if (!array_key_exists($name, $instance)) {
-		    	$this->items[$name]=$name;
-		    //}
-		   	
+		//echo "Results: ".$this->id;
+	
+		//echo '<pre>';
+		//print_r($results);
+		//echo '</pre>';
+
+		if(isset($results[0])){
+			foreach($results[0]->sensordatavalues as $values){
+			    		
+			    $name=$values->value_type;
+			    //if (!array_key_exists($name, $instance)) {
+			    	$this->items[$name]=$name;
+			    //}
+			   	
+			}
+			
+			$pos = $results[0]->location;
+			//var_dump($pos);
+			foreach($results[0]->location as $key => $value){
+			    		
+			    
+			    //if (!array_key_exists($name, $instance)) {
+			    	$this->pos[$key]=$value;
+			    //}
+			   	
+			}
+			$this->valid = 1;
 		}
 	}
 
@@ -441,7 +503,14 @@ class Sensor{
 
 	function fetchJson(){
 
-		$request = wp_remote_get( 'https://api.luftdaten.info/static/v1/sensor/'.$this->id.'/' );
+
+
+ 		if ( false === ( $request = get_transient( 'LuftdatenJSON-'.$this->id ) ) ) {
+ 			$request = wp_remote_get( 'https://api.luftdaten.info/static/v1/sensor/'.$this->id.'/' );
+ 			set_transient('LuftdatenJSON-'.$this->id,$request,120);
+ 		}
+
+		
 
 		if( is_wp_error( $request ) ) {
 			return false; // Bail early
@@ -464,6 +533,8 @@ add_action('widgets_init', create_function('', 'return register_widget("Luftdate
 
 // [feinstaublive title="Titel" sensorIDs="260,262"]
 function feinstaublive($atts) {
+	//echo "atts:";
+	//var_dump($atts);
     
     $widget_name = "LuftdatenWidget";
 
@@ -498,6 +569,7 @@ function feinstaublive($atts) {
 add_shortcode('feinstaublive','feinstaublive'); 
 
 function feinstaubampel($atts) {
+
     
     $widget_name = "LuftdatenAmpel";
 
@@ -511,6 +583,7 @@ function feinstaubampel($atts) {
     $attr = array(
     	'title' => $title,
     	);
+
 
     if(isset($atts['sensorids'])){
     	$comma_separated = explode(",", $atts['sensorids'] );
@@ -530,6 +603,57 @@ function feinstaubampel($atts) {
     
 }
 add_shortcode('feinstaubampel','feinstaubampel'); 
+
+
+function feinstaubkarte($atts) {
+
+    if(isset($atts['title'])){
+    	$title = $atts['title'];
+    }else{
+    	$title = "Feinstaubkarte";
+    }
+
+    $lons = 0;
+    $lats = 0;
+    $k = 0;
+
+
+    $attr = array(
+    	'title' => $title,
+    	);
+
+
+    if(isset($atts['sensorids'])){
+    	$comma_separated = explode(",", $atts['sensorids'] );
+      		
+      	foreach ($comma_separated as $value) {
+      		$sensor = new Sensor( trim($value) );
+      		
+      		if($sensor->valid){
+      			$lons += $sensor->pos['longitude'];
+      			$lats += $sensor->pos['latitude'];
+      			$k++;
+      		}
+      	}
+    }
+
+    $zoom = 11;
+    if(isset($atts['zoom'])){
+    	$zoom = $atts['zoom'];
+    }
+
+    echo '<iframe id="feinstaubkarte" style="width:90%;height:500px; margin: auto;"src="https://maps.luftdaten.info/#' . $zoom . '/' . $lats/$k . '/' . $lons/$k . '"></iframe>';
+
+    
+    /*ob_start();
+    the_widget($widget_name,$attr);
+    $output = ob_get_contents();
+    ob_end_clean();
+    return $output;*/
+    //var_dump($attr);
+    
+}
+add_shortcode('feinstaubkarte','feinstaubkarte'); 
 
 
 ?>
