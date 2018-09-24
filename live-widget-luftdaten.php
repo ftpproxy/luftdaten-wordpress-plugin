@@ -3,7 +3,7 @@
 Plugin Name: Live Widget Luftdaten.info
 Plugin URI: http://www.bleeptrack.de/feinstaub-widget/
 Description: Plugin with widget to show live data from a luftdaten.info sensor
-Version: 1.3.0
+Version: 1.3.1
 Author: Bleeptrack
 Author URI: http://www.bleeptrack.de/
 License: GPL2
@@ -138,7 +138,7 @@ class LuftdatenAmpel extends WP_Widget {
 			if(strcmp($key,'title')&&strcmp($key,'neuersensor')&&strcmp($key,'unit')&&strcmp($key,'addtext')&&strcmp($key,'addtextcheck')&&strcmp($key,'timestamp')){
 			//var_dump($value);	
 				$sensordata = $this->getData($value);
-				var_dump($sensordata);
+				//var_dump($sensordata);
 				if(isset($sensordata['P1']) && isset($sensordata['P2'])){
 
 					//$tstmp = strtotime($sensordata['timestamp']." +2 hours");
@@ -627,7 +627,11 @@ function feinstaubkarte($atts) {
     	$comma_separated = explode(",", $atts['sensorids'] );
       		
       	foreach ($comma_separated as $value) {
+            if( strpos($value,"“") !== false ||  strpos($value,"″") !== false ){
+                echo 'Please check your shortcode for wrong ticks! ';
+            }
       		$sensor = new Sensor( trim($value) );
+      		
       		
       		if($sensor->valid){
       			$lons += $sensor->pos['longitude'];
@@ -641,8 +645,13 @@ function feinstaubkarte($atts) {
     if(isset($atts['zoom'])){
     	$zoom = $atts['zoom'];
     }
+    
+    if($k == 0){
+        echo 'Sorry, no valid sensors :(';
+    }else{
 
-    echo '<iframe id="feinstaubkarte" style="width:90%;height:500px; margin: auto;"src="https://maps.luftdaten.info/#' . $zoom . '/' . $lats/$k . '/' . $lons/$k . '"></iframe>';
+        echo '<iframe id="feinstaubkarte" style="width:90%;height:500px; margin: auto;"src="//maps.luftdaten.info/#' . $zoom . '/' . $lats/$k . '/' . $lons/$k . '"></iframe>';
+    }
 
     
     /*ob_start();
