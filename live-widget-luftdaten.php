@@ -3,7 +3,7 @@
 Plugin Name: Live Widget Luftdaten.info
 Plugin URI: http://www.bleeptrack.de/feinstaub-widget/
 Description: Plugin with widget to show live data from a luftdaten.info sensor
-Version: 1.3.1
+Version: 1.3.2
 Author: Bleeptrack
 Author URI: http://www.bleeptrack.de/
 License: GPL2
@@ -13,8 +13,8 @@ License: GPL2
 class LuftdatenAmpel extends WP_Widget {
 
 	// constructor
-	function LuftdatenAmpel() {
-		parent::WP_Widget(false, $name = __('Luftdaten Ampel', 'LuftdatenAmpel') );
+	function __construct() {
+		parent::__construct(false, $name = __('Luftdaten Ampel', 'LuftdatenAmpel') );
 	}
 
 	// widget form creation
@@ -307,8 +307,8 @@ class LuftdatenAmpel extends WP_Widget {
 class LuftdatenWidget extends WP_Widget {
 
 	// constructor
-	function LuftdatenWidget() {
-		parent::WP_Widget(false, $name = __('Luftdaten Live Widget', 'LuftdatenWidget') );
+	function __construct() {
+		parent::__construct(false, $name = __('Luftdaten Live Widget', 'LuftdatenWidget') );
 	}
 
 	// widget form creation
@@ -524,10 +524,14 @@ class Sensor{
 	}
 }
 
-// register widget
-add_action('widgets_init', create_function('', 'return register_widget("LuftdatenWidget");'));
-add_action('widgets_init', create_function('', 'return register_widget("LuftdatenAmpel");'));
 
+// register widget
+function lda_register_widgets() {
+	register_widget("LuftdatenAmpel");
+	register_widget("LuftdatenWidget");
+}
+
+add_action('widgets_init', 'lda_register_widgets');
 
 ///shortcodes
 
@@ -583,7 +587,6 @@ function feinstaubampel($atts) {
     $attr = array(
     	'title' => $title,
     	);
-
 
     if(isset($atts['sensorids'])){
     	$comma_separated = explode(",", $atts['sensorids'] );
