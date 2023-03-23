@@ -1,12 +1,15 @@
 <?php
 /*
-Plugin Name: Live Widget Luftdaten.info
-Plugin URI: http://www.bleeptrack.de/feinstaub-widget/
-Description: Plugin with widget to show live data from a luftdaten.info sensor
-Version: 1.3.3
-Author: Bleeptrack
-Author URI: http://www.bleeptrack.de/
-License: GPL2
+ * Plugin Name:       Live Widget Luftdaten.info
+ * Plugin URI:        https://github.com/ftpproxy/luftdaten-wordpress-plugin
+ * Description:       Plugin with widget to show live data from a sensor.community sensor
+ * Version:           1.4.0
+ * Requires at least: 5.2
+ * Requires PHP:      7.2
+ * Author:            Andreas Schoenberg, Bleeptrack
+ * Author URI:        https://github.com/ftpproxy/
+ * License:           GPL2
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 */
 
 
