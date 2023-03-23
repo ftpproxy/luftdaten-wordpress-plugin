@@ -10,6 +10,8 @@
  * Author URI:        https://github.com/ftpproxy/
  * License:           GPL2
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       live-widget-luftdaten
+ * Domain Path:       /languages
 */
 
 
@@ -17,7 +19,7 @@ class LuftdatenAmpel extends WP_Widget {
 
 	// constructor
 	function __construct() {
-		parent::__construct(false, $name = __('Luftdaten Ampel', 'LuftdatenAmpel') );
+		parent::__construct(false, $name = __('Luftdaten Ampel', 'live-widget-luftdaten') );
 	}
 
 	// widget form creation
@@ -25,32 +27,32 @@ class LuftdatenAmpel extends WP_Widget {
 		//print_r($instance); // for easy debugging
 	?>
 			<p>
-			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Widget Titel', 'LuftdatenAmpel'); ?></label>
+			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Widget title', 'live-widget-luftdaten'); ?></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $instance['title']; ?>" />
 			</p>
 
 			<p>
-				<label for="<?php echo $this->get_field_id('neuersensor'); ?>"><?php _e('Sensor IDs Kommagetrennt', 'LuftdatenAmpel'); ?></label>
+				<label for="<?php echo $this->get_field_id('neuersensor'); ?>"><?php _e('Sensor IDs - comma separated', 'live-widget-luftdaten'); ?></label>
 				<input class="widefat" id="<?php echo $this->get_field_id('neuersensor'); ?>" name="<?php echo $this->get_field_name('neuersensor'); ?>" type="text" value="<?php echo $instance['neuersensor']; ?>" />
 			</p>
 
 			<p>
-				<label for="<?php echo $this->get_field_id('unit'); ?>"><?php _e('Show Unit?', 'LuftdatenAmpel'); ?></label>
+				<label for="<?php echo $this->get_field_id('unit'); ?>"><?php _e('Show unit?', 'live-widget-luftdaten'); ?></label>
 				<input class="checkbox" type="checkbox" <?php checked( $instance[ 'unit' ], 'on' ); ?> id="<?php echo $this->get_field_id( 'unit' ); ?>" name="<?php echo $this->get_field_name( 'unit' ); ?>" />
 			</p>
 
 			<p>
-				<label for="<?php echo $this->get_field_id('addtextcheck'); ?>"><?php _e('Show additional Text?', 'LuftdatenAmpel'); ?></label>
+				<label for="<?php echo $this->get_field_id('addtextcheck'); ?>"><?php _e('Show additional text?', 'live-widget-luftdaten'); ?></label>
 				<input class="checkbox" type="checkbox" <?php checked( $instance[ 'addtextcheck' ], 'on' ); ?> id="<?php echo $this->get_field_id( 'addtextcheck' ); ?>" name="<?php echo $this->get_field_name( 'addtextcheck' ); ?>" />
 			</p>
 
 			<p>
-				<label for="<?php echo $this->get_field_id('addtext'); ?>"><?php _e('additional Text', 'LuftdatenAmpel'); ?></label>
+				<label for="<?php echo $this->get_field_id('addtext'); ?>"><?php _e('Additional text', 'live-widget-luftdaten'); ?></label>
 				<input class="widefat" id="<?php echo $this->get_field_id('addtext'); ?>" name="<?php echo $this->get_field_name('addtext'); ?>" type="text" value="<?php echo $instance['addtext']; ?>" />
 			</p>
 
 			<p>
-				<label for="<?php echo $this->get_field_id('timestamp'); ?>"><?php _e('Show Timestamp?', 'LuftdatenAmpel'); ?></label>
+				<label for="<?php echo $this->get_field_id('timestamp'); ?>"><?php _e('Show timestamp?', 'live-widget-luftdaten'); ?></label>
 				<input class="checkbox" type="checkbox" <?php checked( $instance[ 'timestamp' ], 'on' ); ?> id="<?php echo $this->get_field_id( 'timestamp' ); ?>" name="<?php echo $this->get_field_name( 'timestamp' ); ?>" />
 			</p>
 
@@ -214,7 +216,7 @@ class LuftdatenAmpel extends WP_Widget {
 			?>
 
 			<p>
-				<label for="<?php echo $this->get_field_id($id.'_'.$key); ?>"><?php _e('Label '.$key, 'LuftdatenWidget'); ?></label>
+				<label for="<?php echo $this->get_field_id($id.'_'.$key); ?>"><?php printf(/* translators: %s: label of the field */ __( 'Label %s', 'live-widget-luftdaten' ), $key); ?></label>
 				<input class="widefat" id="<?php echo $this->get_field_id($id.'_'.$key); ?>" name="<?php echo $this->get_field_name($id.'_'.$key); ?>" type="text" value="<?php echo $value; ?>" />
 			</p>
 
@@ -311,7 +313,7 @@ class LuftdatenWidget extends WP_Widget {
 
 	// constructor
 	function __construct() {
-		parent::__construct(false, $name = __('Luftdaten Live Widget', 'LuftdatenWidget') );
+		parent::__construct(false, $name = __('Luftdaten Live Widget', 'live-widget-luftdaten') );
 	}
 
 	// widget form creation
@@ -319,12 +321,12 @@ class LuftdatenWidget extends WP_Widget {
 		//print_r($instance); for easy debugging
 	?>
 			<p>
-			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Widget Titel', 'LuftdatenWidget'); ?></label>
+			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Widget title', 'live-widget-luftdaten'); ?></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $instance['title']; ?>" />
 			</p>
 
 			<p>
-				<label for="<?php echo $this->get_field_id('neuersensor'); ?>"><?php _e('Sensor IDs Kommagetrennt', 'LuftdatenWidget'); ?></label>
+				<label for="<?php echo $this->get_field_id('neuersensor'); ?>"><?php _e('Sensor IDs - comma separated', 'live-widget-luftdaten'); ?></label>
 				<input class="widefat" id="<?php echo $this->get_field_id('neuersensor'); ?>" name="<?php echo $this->get_field_name('neuersensor'); ?>" type="text" value="<?php echo $instance['neuersensor']; ?>" />
 			</p>
 	<?php
@@ -392,7 +394,7 @@ class LuftdatenWidget extends WP_Widget {
 			?>
 
 			<p>
-				<label for="<?php echo $this->get_field_id($id.'_'.$key); ?>"><?php _e('Label '.$key, 'LuftdatenWidget'); ?></label>
+				<label for="<?php echo $this->get_field_id($id.'_'.$key); ?>"><?php _e('Label '.$key, 'live-widget-luftdaten'); ?></label>
 				<input class="widefat" id="<?php echo $this->get_field_id($id.'_'.$key); ?>" name="<?php echo $this->get_field_name($id.'_'.$key); ?>" type="text" value="<?php echo $value; ?>" />
 			</p>
 
